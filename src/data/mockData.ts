@@ -40,11 +40,11 @@ export const tenants: Tenant[] = [
 const today = new Date();
 
 export const contracts: Contract[] = [
-  { id: 'c1', apartmentId: 'a1', tenantId: 't1', startDate: '2023-01-01', endDate: format(addDays(today, 15), 'yyyy-MM-dd'), annualRent: 35000, paymentFrequency: 'semi-annually', status: 'active', renewalReminderDays: 30 },
-  { id: 'c2', apartmentId: 'a3', tenantId: 't2', startDate: '2023-06-01', endDate: format(addDays(today, 60), 'yyyy-MM-dd'), annualRent: 35000, paymentFrequency: 'monthly', status: 'active', renewalReminderDays: 30 },
-  { id: 'c3', apartmentId: 'a6', tenantId: 't3', startDate: '2023-09-01', endDate: format(addDays(today, 120), 'yyyy-MM-dd'), annualRent: 36000, paymentFrequency: 'quarterly', status: 'active', renewalReminderDays: 30 },
-  { id: 'c4', apartmentId: 'a9', tenantId: 't4', startDate: '2022-02-01', endDate: format(subDays(today, 10), 'yyyy-MM-dd'), annualRent: 55000, paymentFrequency: 'annually', status: 'expired' },
-  { id: 'c5', apartmentId: 'a10', tenantId: 't5', startDate: '2023-11-01', endDate: format(addDays(today, 200), 'yyyy-MM-dd'), annualRent: 55000, paymentFrequency: 'semi-annually', status: 'active', renewalReminderDays: 30 },
+  { id: 'c1', apartmentId: 'a1', tenantId: 't1', startDate: '2023-01-01', endDate: format(addDays(today, 15), 'yyyy-MM-dd'), annualRent: 35000, deposit: 2000, paymentFrequency: 'semi-annually', status: 'active', renewalReminderDays: 30 },
+  { id: 'c2', apartmentId: 'a3', tenantId: 't2', startDate: '2023-06-01', endDate: format(addDays(today, 60), 'yyyy-MM-dd'), annualRent: 35000, deposit: 2000, paymentFrequency: 'monthly', status: 'active', renewalReminderDays: 30 },
+  { id: 'c3', apartmentId: 'a6', tenantId: 't3', startDate: '2023-09-01', endDate: format(addDays(today, 120), 'yyyy-MM-dd'), annualRent: 36000, deposit: 2500, paymentFrequency: 'quarterly', status: 'active', renewalReminderDays: 30 },
+  { id: 'c4', apartmentId: 'a9', tenantId: 't4', startDate: '2022-02-01', endDate: format(subDays(today, 10), 'yyyy-MM-dd'), annualRent: 55000, deposit: 5000, paymentFrequency: 'annually', status: 'expired' },
+  { id: 'c5', apartmentId: 'a10', tenantId: 't5', startDate: '2023-11-01', endDate: format(addDays(today, 200), 'yyyy-MM-dd'), annualRent: 55000, deposit: 5000, paymentFrequency: 'semi-annually', status: 'active', renewalReminderDays: 30 },
 ];
 
 export const invoices: Invoice[] = [

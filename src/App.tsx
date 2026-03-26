@@ -17,9 +17,12 @@ import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 
 export default function App() {
+  // Get the repository name from the URL path if possible, or default to root
+  const basename = window.location.pathname.startsWith('/-') ? '/-' : '/';
+
   return (
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />

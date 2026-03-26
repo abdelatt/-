@@ -42,6 +42,7 @@ export interface Contract {
   startDate: string;
   endDate: string;
   annualRent: number;
+  deposit: number;
   paymentFrequency: 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
   status: 'active' | 'expired' | 'terminated';
   renewalReminderDays?: number;

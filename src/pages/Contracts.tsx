@@ -7,6 +7,9 @@ export default function Contracts() {
   const { contracts: allContracts, setContracts: setAllContracts, tenants, apartments, buildings } = useApp();
   const [filter, setFilter] = useState<'all' | 'active' | 'expired' | 'terminated'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
+  const [paymentFrequencyFilter, setPaymentFrequencyFilter] = useState<string>('all');
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [isAddContractModalOpen, setIsAddContractModalOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<any>(null);
@@ -18,7 +21,8 @@ export default function Contracts() {
     startDate: '',
     endDate: '',
     annualRent: '',
-    paymentMethod: 'monthly'
+    deposit: '',
+    paymentFrequency: 'monthly' as any
   });
 
   const getContractDetails = (contract: any) => {
@@ -32,7 +36,12 @@ export default function Contracts() {
     const { tenant } = getContractDetails(c);
     const matchesFilter = filter === 'all' || c.status === filter;
     const matchesSearch = tenant?.name.includes(searchTerm) || c.id.includes(searchTerm);
-    return matchesFilter && matchesSearch;
+    
+    const matchesStartDate = !startDateFilter || c.startDate >= startDateFilter;
+    const matchesEndDate = !endDateFilter || c.endDate <= endDateFilter;
+    const matchesFrequency = paymentFrequencyFilter === 'all' || c.paymentFrequency === paymentFrequencyFilter;
+
+    return matchesFilter && matchesSearch && matchesStartDate && matchesEndDate && matchesFrequency;
   });
 
   const activeContractsList = allContracts.filter(c => c.status === 'active');
@@ -69,15 +78,16 @@ export default function Contracts() {
       startDate: contractForm.startDate,
       endDate: contractForm.endDate,
       annualRent: parseInt(contractForm.annualRent),
-      status: 'active',
-      paymentMethod: contractForm.paymentMethod,
+      deposit: parseInt(contractForm.deposit) || 0,
+      status: 'active' as const,
+      paymentFrequency: contractForm.paymentFrequency,
       renewalReminderDays: 30
     };
     setAllContracts([newContract, ...allContracts]);
     setIsAddContractModalOpen(false);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
-    setContractForm({ tenantId: '', apartmentId: '', startDate: '', endDate: '', annualRent: '', paymentMethod: 'monthly' });
+    setContractForm({ tenantId: '', apartmentId: '', startDate: '', endDate: '', annualRent: '', deposit: '', paymentFrequency: 'monthly' });
   };
 
   const handleSort = (key: string) => {
@@ -173,32 +183,69 @@ export default function Contracts() {
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="relative w-full sm:w-72">
-            <Search className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="ابحث باسم الساكن أو رقم العقد..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-4 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+        <div className="p-4 border-b border-slate-200 space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="relative w-full sm:w-72">
+              <Search className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="ابحث باسم الساكن أو رقم العقد..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Filter className="w-4 h-4 text-slate-400 ml-2" />
+              {(['all', 'active', 'expired', 'terminated'] as const).map(s => (
+                <button
+                  key={s}
+                  onClick={() => setFilter(s)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    filter === s ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  )}
+                >
+                  {s === 'all' ? 'الكل' : s === 'active' ? 'نشط' : s === 'expired' ? 'منتهي' : 'ملغى'}
+                </button>
+              ))}
+            </div>
           </div>
-          
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Filter className="w-4 h-4 text-slate-400 ml-2" />
-            {(['all', 'active', 'expired', 'terminated'] as const).map(s => (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                  filter === s ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">تاريخ البدء (من)</label>
+              <input 
+                type="date"
+                value={startDateFilter}
+                onChange={(e) => setStartDateFilter(e.target.value)}
+                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">تاريخ الانتهاء (إلى)</label>
+              <input 
+                type="date"
+                value={endDateFilter}
+                onChange={(e) => setEndDateFilter(e.target.value)}
+                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">دورية الدفع</label>
+              <select 
+                value={paymentFrequencyFilter}
+                onChange={(e) => setPaymentFrequencyFilter(e.target.value)}
+                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {s === 'all' ? 'الكل' : s === 'active' ? 'نشط' : s === 'expired' ? 'منتهي' : 'ملغى'}
-              </button>
-            ))}
+                <option value="all">الكل</option>
+                <option value="monthly">شهري</option>
+                <option value="quarterly">ربع سنوي</option>
+                <option value="semi-annually">نصف سنوي</option>
+                <option value="annually">سنوي</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -392,17 +439,30 @@ export default function Contracts() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-bold text-slate-700">طريقة الدفع</label>
+                  <label className="text-sm font-bold text-slate-700">مبلغ التأمين</label>
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      required 
+                      value={contractForm.deposit}
+                      onChange={(e) => setContractForm({...contractForm, deposit: e.target.value})}
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs">ريال</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-slate-700">دورية الدفع</label>
                   <select 
                     required 
-                    value={contractForm.paymentMethod}
-                    onChange={(e) => setContractForm({...contractForm, paymentMethod: e.target.value})}
+                    value={contractForm.paymentFrequency}
+                    onChange={(e) => setContractForm({...contractForm, paymentFrequency: e.target.value as any})}
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="monthly">شهري</option>
                     <option value="quarterly">ربع سنوي</option>
-                    <option value="semi-annual">نصف سنوي</option>
-                    <option value="annual">سنوي</option>
+                    <option value="semi-annually">نصف سنوي</option>
+                    <option value="annually">سنوي</option>
                   </select>
                 </div>
               </div>
@@ -476,7 +536,15 @@ export default function Contracts() {
                     </div>
                     <div>
                       <p className="text-xs text-blue-600 mb-1">مبلغ التأمين</p>
-                      <p className="text-lg font-bold text-blue-900">{formatCurrency(2000)}</p>
+                      <p className="text-lg font-bold text-blue-900">{formatCurrency(selectedContract.deposit)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-blue-600 mb-1">دورية الدفع</p>
+                      <p className="text-sm font-bold text-blue-900">
+                        {selectedContract.paymentFrequency === 'monthly' ? 'شهري' :
+                         selectedContract.paymentFrequency === 'quarterly' ? 'ربع سنوي' :
+                         selectedContract.paymentFrequency === 'semi-annually' ? 'نصف سنوي' : 'سنوي'}
+                      </p>
                     </div>
                   </div>
                 </div>
