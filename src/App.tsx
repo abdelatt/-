@@ -17,8 +17,8 @@ import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 
 export default function App() {
-  // Get the repository name from the URL path if possible, or default to root
-  const basename = window.location.pathname.startsWith('/-') ? '/-' : '/';
+  // Handle GitHub Pages subpaths automatically
+  const basename = window.location.pathname.split('/')[1] ? `/${window.location.pathname.split('/')[1]}` : '/';
 
   return (
     <AppProvider>
