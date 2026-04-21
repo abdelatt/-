@@ -8,6 +8,8 @@ export default function Buildings() {
   const [selectedBuilding, setSelectedBuilding] = useState(allBuildings[0]?.id);
   const [isAddBuildingModalOpen, setIsAddBuildingModalOpen] = useState(false);
   const [selectedApartment, setSelectedApartment] = useState<any>(null);
+  const [isEditingApartment, setIsEditingApartment] = useState(false);
+  const [editApartmentPrice, setEditApartmentPrice] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [buildingForm, setBuildingForm] = useState({
@@ -72,6 +74,34 @@ export default function Buildings() {
     setBuildingForm({ name: '', address: '', floors: '', apartmentsPerFloor: '' });
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const handleSaveApartment = () => {
+    if (!selectedApartment) return;
+    const newPrice = parseFloat(editApartmentPrice);
+    if (isNaN(newPrice)) return;
+
+    const updatedApartments = allApartments.map(apt => 
+      apt.id === selectedApartment.id 
+        ? { ...apt, price: newPrice } 
+        : apt
+    );
+
+    setAllApartments(updatedApartments);
+    setSelectedApartment({ ...selectedApartment, price: parseFloat(editApartmentPrice) });
+    setIsEditingApartment(false);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const startEditing = () => {
+    setEditApartmentPrice(selectedApartment.price?.toString() || '25000');
+    setIsEditingApartment(true);
+  };
+
+  const closeApartmentModal = () => {
+    setSelectedApartment(null);
+    setIsEditingApartment(false);
   };
 
   const getStatusIcon = (status: string) => {
@@ -350,7 +380,7 @@ export default function Buildings() {
                 </div>
                 <h3 className="text-xl font-bold text-slate-800">تفاصيل الشقة {selectedApartment.apartmentNumber}</h3>
               </div>
-              <button onClick={() => setSelectedApartment(null)} className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-slate-200">
+              <button onClick={closeApartmentModal} className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-slate-200">
                 <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
@@ -392,13 +422,34 @@ export default function Buildings() {
                 </h4>
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center">
                   <span className="text-sm text-slate-600">السعر السنوي</span>
-                  <span className="font-bold text-slate-900">{formatCurrency(selectedApartment.price || 25000)}</span>
+                  {isEditingApartment ? (
+                    <div className="flex items-center gap-2">
+                       <input 
+                        type="number" 
+                        value={editApartmentPrice}
+                        onChange={(e) => setEditApartmentPrice(e.target.value)}
+                        className="w-32 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      />
+                      <span className="text-sm font-bold text-slate-900">ر.س</span>
+                    </div>
+                  ) : (
+                    <span className="font-bold text-slate-900">{formatCurrency(selectedApartment.price || 25000)}</span>
+                  )}
                 </div>
               </div>
             </div>
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-              <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">تعديل البيانات</button>
-              <button onClick={() => setSelectedApartment(null)} className="flex-1 bg-white border border-slate-200 text-slate-600 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors">إغلاق</button>
+              {isEditingApartment ? (
+                <>
+                  <button onClick={handleSaveApartment} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold hover:bg-emerald-700 transition-colors">حفظ التعديلات</button>
+                  <button onClick={() => setIsEditingApartment(false)} className="flex-1 bg-white border border-slate-200 text-slate-600 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors">إلغاء</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={startEditing} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">تعديل البيانات</button>
+                  <button onClick={closeApartmentModal} className="flex-1 bg-white border border-slate-200 text-slate-600 py-2 rounded-lg font-bold hover:bg-slate-50 transition-colors">إغلاق</button>
+                </>
+              )}
             </div>
           </div>
         </div>
